@@ -13,4 +13,5 @@ require (
 	github.com/go-kit/log v0.2.0 // indirect
 	github.com/go-logfmt/logfmt v0.5.1 // indirect
 	github.com/gorilla/mux v1.8.0 // indirect
+	gopkg.in/stack.v1 v1.7.0 // indirect
 )

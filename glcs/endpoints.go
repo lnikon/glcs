@@ -2,6 +2,7 @@ package glcs
 
 import (
 	"context"
+	"log"
 
 	"github.com/go-kit/kit/endpoint"
 )
@@ -13,62 +14,123 @@ type Endpoints struct {
 	StopEndpoint   endpoint.Endpoint
 }
 
-func MakeStartEndpoint(srv ComputationService) endpoint.Endpoint {
-    return func(ctx context.Context, request interface{}) (interface{}, error) {
-        r := request.(startRequest)
+func MakeStartEndpoint(srv *ComputationService) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		r := request.(startRequest)
 
-        desc := ComputationDescription{
-            Name: r.name,
-            Algorithm: r.algorithm,
-            VertexCount: r.vertexCount,
-            Density: r.density,
-        }
+		desc := ComputationDescription{
+			Name:        r.Name,
+			Algorithm:   r.Algorithm,
+			VertexCount: r.VertexCount,
+			Density:     r.Density,
+		}
 
-        err := srv.Start(&desc)
-        if err != nil {
-            return nil, err
-        }
+		log.Println("%#v", desc)
 
-        return startResponse{Starting}, nil
-    }
+		status, err := srv.Start(ctx, &desc)
+		if err != nil {
+			return nil, err
+		}
+
+		return startResponse{*status}, nil
+	}
 }
 
-func MakeStatusEndpoint(srv ComputationService) endpoint.Endpoint {
-    return func(ctx context.Context, request interface{}) (interface{}, error) {
-        r := request.(statusRequest)
+func MakeStatusEndpoint(srv *ComputationService) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		r := request.(statusRequest)
 
-        status, err := srv.Status(r.name)
-        if err != nil {
-            return nil, err
-        }
+		status, err := srv.Status(ctx, r.Name)
+		if err != nil {
+			return nil, err
+		}
 
-        return statusResponse{*status}, nil
-    }
+		return statusResponse{*status}, nil
+	}
 }
 
-func MakeResultEndpoint(srv ComputationService) endpoint.Endpoint {
-    return func(ctx context.Context, request interface{}) (interface{}, error) {
-        r := request.(resultRequest)
+func MakeResultEndpoint(srv *ComputationService) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		r := request.(resultRequest)
 
-        result, err := srv.Result(r.name)
-        if err != nil {
-            return nil, err
-        }
+		result, err := srv.Result(ctx, r.Name)
+		if err != nil {
+			return nil, err
+		}
 
-        return resultResponse{*result}, nil
-    }
-}
- 
-func MakeStopEndpoint(srv ComputationService) endpoint.Endpoint {
-    return func(ctx context.Context, request interface{}) (interface{}, error) {
-        r := request.(stopRequest)
-
-        err := srv.Stop(r.name)
-        if err != nil {
-            return nil, err
-        }
-
-        return stopResponse{}, nil
-    }
+		return resultResponse{*result}, nil
+	}
 }
 
+func MakeStopEndpoint(srv *ComputationService) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		r := request.(stopRequest)
+
+		resp, err := srv.Stop(ctx, r.Name)
+		if err != nil {
+			return nil, err
+		}
+
+		return stopResponse{*resp}, nil
+	}
+}
+
+// func (e Endpoints) Start(ctx context.Context, desc *ComputationDescription) (*ComputationStatus, error) {
+// 	req := startRequest{
+// 		Algorithm:   desc.Algorithm,
+// 		Name:        desc.Name,
+// 		VertexCount: desc.VertexCount,
+// 		density:     desc.Density,
+// 	}
+//
+// 	resp, err := e.StartEndpoint(ctx, req)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+//
+// 	startResp := resp.(startResponse)
+// 	return &startResp.status, nil
+// }
+//
+// func (e Endpoints) Status(ctx context.Context, name string) (*ComputationStatus, error) {
+// 	req := statusRequest{
+// 		name: name,
+// 	}
+//
+// 	resp, err := e.StatusEndpoint(ctx, req)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+//
+// 	// statusResp := statusResponse{}
+// 	statusResp := resp.(statusResponse)
+// 	return &statusResp.status, nil
+// }
+//
+// func (e Endpoints) Result(ctx context.Context, name string) (*ComputationResult, error) {
+// 	req := resultRequest{
+// 		name: name,
+// 	}
+//
+// 	resp, err := e.ResultEndpoint(ctx, req)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+//
+// 	resultResp := resp.(resultResponse)
+// 	return &resultResp.result, nil
+// }
+//
+// func (e Endpoints) Stop(ctx context.Context, name string) (*ComputationStatus, error) {
+// 	req := stopRequest{
+// 		name: name,
+// 	}
+//
+// 	resp, err := e.StopEndpoint(ctx, req)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+//
+// 	stopResp := resp.(stopResponse)
+// 	return &stopResp.status, nil
+// }

@@ -1,5 +1,7 @@
 package glcs
 
+import "context"
+
 type Algorithm string
 
 const (
@@ -7,30 +9,36 @@ const (
 	Kruskal           = "Kruskal"
 )
 
-type ComputationStatus string
+type ComputationStatusValue string
 
 const (
-	Starting   ComputationStatus = "Starting"
-	Started                      = "Started"
-	InProgress                   = "Started"
-	Finished                     = "Finished"
-	Failed                       = "Failed"
+	Undefined  ComputationStatusValue = "Undefined"
+	Starting                          = "Starting"
+	Started                           = "Started"
+	InProgress                        = "Started"
+	Finished                          = "Finished"
+	Failed                            = "Failed"
 )
+
+type ComputationStatus struct {
+	Status ComputationStatusValue
+}
+
 type ComputationResult struct {
-    status ComputationStatus
-    // TODO: More fields to be added.
+	Status ComputationStatusValue `json:"status"`
+	// TODO: More fields to be added.
 }
 
 type ComputationDescription struct {
-	Name        string
-	Algorithm   Algorithm
-	VertexCount uint32
-	Density     uint32
+	Name        string    `json:"name"`
+	Algorithm   Algorithm `json:"algorithm"`
+	VertexCount uint32    `json:"vertexCount"`
+	Density     uint32    `json:"density"`
 }
 
 type ComputationServiceInterface interface {
-	Start(desc *ComputationDescription) error
-	Status(name string) (*ComputationStatus, error)
-	Result(name string) (*ComputationResult, error)
-    Stop(name string) error
+	Start(ctx context.Context, desc *ComputationDescription) (*ComputationStatus, error)
+	Status(ctx context.Context, name string) (*ComputationStatus, error)
+	Result(ctx context.Context, name string) (*ComputationResult, error)
+	Stop(ctx context.Context, name string) (*ComputationStatus, error)
 }
