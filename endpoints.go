@@ -1,8 +1,7 @@
-package glcs
+package main
 
 import (
 	"context"
-	"log"
 
 	"github.com/go-kit/kit/endpoint"
 )
@@ -23,9 +22,8 @@ func MakeStartEndpoint(srv *ComputationService) endpoint.Endpoint {
 			Algorithm:   r.Algorithm,
 			VertexCount: r.VertexCount,
 			Density:     r.Density,
+			Replicas:    r.Replicas,
 		}
-
-		log.Println("%#v", desc)
 
 		status, err := srv.Start(ctx, &desc)
 		if err != nil {
@@ -55,6 +53,7 @@ func MakeResultEndpoint(srv *ComputationService) endpoint.Endpoint {
 
 		result, err := srv.Result(ctx, r.Name)
 		if err != nil {
+			srv.Logger.Log("ResultEndpoint", "Failed", "Error", err)
 			return nil, err
 		}
 

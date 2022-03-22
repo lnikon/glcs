@@ -1,4 +1,4 @@
-package glcs
+package main
 
 import (
     "time"

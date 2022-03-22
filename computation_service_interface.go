@@ -1,4 +1,4 @@
-package glcs
+package main
 
 import "context"
 
@@ -12,12 +12,15 @@ const (
 type ComputationStatusValue string
 
 const (
-	Undefined  ComputationStatusValue = "Undefined"
-	Starting                          = "Starting"
-	Started                           = "Started"
-	InProgress                        = "Started"
-	Finished                          = "Finished"
-	Failed                            = "Failed"
+	Undefined                    ComputationStatusValue = "Undefined"
+	NotStarted                                          = "NotStarted"
+	Starting                                            = "Starting"
+	Started                                             = "Started"
+	FailedToUpdateDb                                    = "FailedToUpdateDb"
+	AnotherComputationInProgress                        = "AnotherCommunicationInProcess"
+	InProgress                                          = "Started"
+	Finished                                            = "Finished"
+	Failed                                              = "Failed"
 )
 
 type ComputationStatus struct {
@@ -26,6 +29,7 @@ type ComputationStatus struct {
 
 type ComputationResult struct {
 	Status ComputationStatusValue `json:"status"`
+	Result string
 	// TODO: More fields to be added.
 }
 
@@ -34,6 +38,7 @@ type ComputationDescription struct {
 	Algorithm   Algorithm `json:"algorithm"`
 	VertexCount uint32    `json:"vertexCount"`
 	Density     uint32    `json:"density"`
+	Replicas    uint32    `json:"replicas"`
 }
 
 type ComputationServiceInterface interface {

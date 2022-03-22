@@ -1,4 +1,4 @@
-package glcs
+package main
 
 import (
 	"context"
@@ -9,6 +9,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
+// Creates new HTTP server to handle incoming UPCXX computation requests
 func NewHTTPServer(ctx context.Context, endpoints Endpoints, logger log.Logger) http.Handler {
 	loggingMiddleware := LoggingMiddleware(logger)
 

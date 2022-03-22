@@ -1,4 +1,4 @@
-package glcs
+package main
 
 import (
 	"context"
@@ -11,6 +11,7 @@ type startRequest struct {
 	Name        string    `json:"name"`
 	VertexCount uint32    `json:"vertexCount"`
 	Density     uint32    `json:"density"`
+	Replicas    uint32    `json:"replicas"`
 }
 
 type startResponse struct {
