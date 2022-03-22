@@ -5,7 +5,6 @@ import (
 	"context"
 	"fmt"
 	"os/exec"
-	"strings"
 
 	"github.com/lnikon/glcs/common"
 
@@ -85,19 +84,6 @@ func (cs *ComputationService) Result(ctx context.Context, name string) (*Computa
 
 func (*ComputationService) Stop(ctx context.Context, name string) (*ComputationStatus, error) {
 	return &ComputationStatus{Status: "Undefined"}, nil
-}
-
-func constructParameter(name string) string {
-	return strings.Join([]string{"--", name}, "")
-}
-
-func (cs *ComputationService) constructLunchArguments(desc *ComputationDescription) []string {
-	return []string{strings.Join([]string{string(Replicas), fmt.Sprintf("%d", desc.Replicas)}, ""), cs.pgasGraphRunner,
-		constructParameter(string(VertexCount)), fmt.Sprintf("%d", desc.VertexCount),
-		constructParameter(string(Percentage)), fmt.Sprintf("%d", desc.Density)}
-
-	// TODO: Do we ever gonna need this?
-	// constructParameter("export-path"), constructResultFileName(desc.Name)}
 }
 
 // Launches computation using provided description and returns. Doesn't waits for it to finish.
