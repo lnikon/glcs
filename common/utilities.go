@@ -1,4 +1,4 @@
-package main
+package common
 
 import (
 	"errors"
@@ -22,6 +22,15 @@ const (
 	UPCXX                      = "upcxx"
 	UPCXXRun                   = "upcxx-run"
 	PGASGraphRun               = "pgas-graph-cli-smp"
+)
+
+type DBEnvVar string
+
+// Move into .env.
+const (
+	DBName     DBEnvVar = "DB_NAME"
+	DBUser     DBEnvVar = "DB_USER"
+	DBPassword DBEnvVar = "DB_PASSWORD"
 )
 
 func CheckUpcxxEnvVars() error {

@@ -1,4 +1,4 @@
-package main
+package computation
 
 import (
 	"bytes"
@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"os/exec"
 	"strings"
+
+	"github.com/lnikon/glcs/common"
 
 	"github.com/go-kit/log"
 )
@@ -17,16 +19,6 @@ const (
 	VertexCount ComputationLaunchParameterType = "vertex-count"
 	Percentage  ComputationLaunchParameterType = "percentage"
 )
-
-type Computation struct {
-	description *ComputationDescription
-	cmd         *exec.Cmd
-	result      bytes.Buffer
-}
-
-type ComputationCache struct {
-	data []Computation
-}
 
 type ComputationService struct {
 	Logger          log.Logger
@@ -46,12 +38,12 @@ func NewComputationService(logger log.Logger) (*ComputationService, error) {
 		return nil, fmt.Errorf("Unable to connect to DB")
 	}
 
-	upcxxRunnerBinary, lookErr := exec.LookPath(string(UPCXXRun))
+	upcxxRunnerBinary, lookErr := exec.LookPath(string(common.UPCXXRun))
 	if lookErr != nil {
 		return nil, fmt.Errorf("Unable to start new UPCXX computation, error=%s", lookErr)
 	}
 
-	pgasGraphRunnerBinary, lookErr := exec.LookPath(string(PGASGraphRun))
+	pgasGraphRunnerBinary, lookErr := exec.LookPath(string(common.PGASGraphRun))
 	if lookErr != nil {
 		return nil, fmt.Errorf("Unable to start new UPCXX computation, error=%s", lookErr)
 	}

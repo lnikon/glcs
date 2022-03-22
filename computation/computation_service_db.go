@@ -1,4 +1,4 @@
-package main
+package computation
 
 import (
 	"database/sql"
@@ -6,16 +6,9 @@ import (
 	"os"
 	"time"
 
+	"github.com/lnikon/glcs/common"
+
 	_ "github.com/lib/pq"
-)
-
-type DBEnvVar string
-
-// Move into .env.
-const (
-	DBName     DBEnvVar = "DB_NAME"
-	DBUser     DBEnvVar = "DB_USER"
-	DBPassword DBEnvVar = "DB_PASSWORD"
 )
 
 type ComputationServiceDbConnector struct {
@@ -23,9 +16,9 @@ type ComputationServiceDbConnector struct {
 }
 
 func NewComputationServiceDbConnector() (*ComputationServiceDbConnector, error) {
-	dbUser := os.Getenv(string(DBUser))
-	dbPassword := os.Getenv(string(DBUser))
-	dbName := os.Getenv(string(DBName))
+	dbUser := os.Getenv(string(common.DBUser))
+	dbPassword := os.Getenv(string(common.DBUser))
+	dbName := os.Getenv(string(common.DBName))
 	dbInfo := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable", dbUser, dbPassword, dbName)
 
 	db, err := sql.Open("postgres", dbInfo)

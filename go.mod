@@ -9,4 +9,10 @@ require (
 	github.com/lib/pq v1.10.4
 )
 
+replace github.com/lnikon/glcs/computation => ./computation
+
+replace github.com/lnikon/glcs/server => ./server
+
+replace github.com/lnikon/glcs/utilities => ./utilities
+
 require github.com/go-logfmt/logfmt v0.5.1 // indirect

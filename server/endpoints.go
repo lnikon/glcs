@@ -1,7 +1,9 @@
-package main
+package server
 
 import (
 	"context"
+
+	"github.com/lnikon/glcs/computation"
 
 	"github.com/go-kit/kit/endpoint"
 )
@@ -13,11 +15,11 @@ type Endpoints struct {
 	StopEndpoint   endpoint.Endpoint
 }
 
-func MakeStartEndpoint(srv *ComputationService) endpoint.Endpoint {
+func MakeStartEndpoint(srv *computation.ComputationService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		r := request.(startRequest)
 
-		desc := ComputationDescription{
+		desc := computation.ComputationDescription{
 			Name:        r.Name,
 			Algorithm:   r.Algorithm,
 			VertexCount: r.VertexCount,
@@ -34,7 +36,7 @@ func MakeStartEndpoint(srv *ComputationService) endpoint.Endpoint {
 	}
 }
 
-func MakeStatusEndpoint(srv *ComputationService) endpoint.Endpoint {
+func MakeStatusEndpoint(srv *computation.ComputationService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		r := request.(statusRequest)
 
@@ -47,7 +49,7 @@ func MakeStatusEndpoint(srv *ComputationService) endpoint.Endpoint {
 	}
 }
 
-func MakeResultEndpoint(srv *ComputationService) endpoint.Endpoint {
+func MakeResultEndpoint(srv *computation.ComputationService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		r := request.(resultRequest)
 
@@ -61,7 +63,7 @@ func MakeResultEndpoint(srv *ComputationService) endpoint.Endpoint {
 	}
 }
 
-func MakeStopEndpoint(srv *ComputationService) endpoint.Endpoint {
+func MakeStopEndpoint(srv *computation.ComputationService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		r := request.(stopRequest)
 

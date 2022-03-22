@@ -10,6 +10,10 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/lnikon/glcs/common"
+	"github.com/lnikon/glcs/computation"
+	"github.com/lnikon/glcs/server"
+
 	log "github.com/go-kit/log"
 )
 
@@ -21,17 +25,17 @@ func setupLogger() log.Logger {
 }
 
 func checkEnvironment(logger log.Logger) error {
-	if err := CheckUpcxxEnvVars(); err != nil {
+	if err := common.CheckUpcxxEnvVars(); err != nil {
 		logger.Log("CheckUpcxxEnvVars", "Failed", "Error", err)
 		return err
 	}
 
-	if err := CheckDbEnvVars(); err != nil {
+	if err := common.CheckDbEnvVars(); err != nil {
 		logger.Log("CheckDbEnvVars", "Failed", "Error", err)
 		return err
 	}
 
-	if err := CheckUpcxxBinaries(); err != nil {
+	if err := common.CheckUpcxxBinaries(); err != nil {
 		logger.Log("CheckUpcxxBinaries", "Failed", "Error", err)
 		return err
 	}
@@ -39,12 +43,12 @@ func checkEnvironment(logger log.Logger) error {
 	return nil
 }
 
-func setupEndpoints(srv *ComputationService) Endpoints {
-	return Endpoints{
-		StartEndpoint:  MakeStartEndpoint(srv),
-		StatusEndpoint: MakeStatusEndpoint(srv),
-		ResultEndpoint: MakeResultEndpoint(srv),
-		StopEndpoint:   MakeStopEndpoint(srv),
+func setupEndpoints(srv *computation.ComputationService) server.Endpoints {
+	return server.Endpoints{
+		StartEndpoint:  server.MakeStartEndpoint(srv),
+		StatusEndpoint: server.MakeStatusEndpoint(srv),
+		ResultEndpoint: server.MakeResultEndpoint(srv),
+		StopEndpoint:   server.MakeStopEndpoint(srv),
 	}
 }
 
@@ -70,9 +74,9 @@ func main() {
 		errChan <- fmt.Errorf("%s", <-c)
 	}()
 
-	srv, err := NewComputationService(logger)
+	srv, err := computation.NewComputationService(logger)
 	if err != nil {
-		logger.Log("NewComputationService", Failed, "Error", err)
+		logger.Log("NewComputationService", computation.Failed, "Error", err)
 		return
 	}
 	endpoints := setupEndpoints(srv)
@@ -80,7 +84,7 @@ func main() {
 	ctx := context.Background()
 	go func() {
 		logger.Log("listening", *httpAddr)
-		handler := NewHTTPServer(ctx, endpoints, logger)
+		handler := server.NewHTTPServer(ctx, endpoints, logger)
 		errChan <- http.ListenAndServe(*httpAddr, handler)
 	}()
 

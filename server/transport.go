@@ -1,21 +1,23 @@
-package main
+package server
 
 import (
 	"context"
 	"encoding/json"
 	"net/http"
+
+	"github.com/lnikon/glcs/computation"
 )
 
 type startRequest struct {
-	Algorithm   Algorithm `json:"algorithm"`
-	Name        string    `json:"name"`
-	VertexCount uint32    `json:"vertexCount"`
-	Density     uint32    `json:"density"`
-	Replicas    uint32    `json:"replicas"`
+	Algorithm   computation.Algorithm `json:"algorithm"`
+	Name        string                `json:"name"`
+	VertexCount uint32                `json:"vertexCount"`
+	Density     uint32                `json:"density"`
+	Replicas    uint32                `json:"replicas"`
 }
 
 type startResponse struct {
-	Status ComputationStatus `json:"status"`
+	Status computation.ComputationStatus `json:"status"`
 }
 
 type statusRequest struct {
@@ -23,7 +25,7 @@ type statusRequest struct {
 }
 
 type statusResponse struct {
-	Status ComputationStatus `json:"status"`
+	Status computation.ComputationStatus `json:"status"`
 }
 
 type resultRequest struct {
@@ -31,7 +33,7 @@ type resultRequest struct {
 }
 
 type resultResponse struct {
-	Result ComputationResult `json:"result"`
+	Result computation.ComputationResult `json:"result"`
 }
 
 type stopRequest struct {
@@ -39,7 +41,7 @@ type stopRequest struct {
 }
 
 type stopResponse struct {
-	Status ComputationStatus `json:"status"`
+	Status computation.ComputationStatus `json:"status"`
 }
 
 func decodeStartRequest(ctx context.Context, r *http.Request) (interface{}, error) {
