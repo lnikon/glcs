@@ -31,13 +31,14 @@ func NewComputationServiceDbConnector() (*ComputationServiceDbConnector, error) 
 	}, nil
 }
 
-func (cc *ComputationServiceDbConnector) WriteNewComputationIntoDb(desc *ComputationDescription) error {
+func (cc *ComputationServiceDbConnector) WriteNewComputationIntoDb(computation *Computation) error {
 	stmt, err := cc.db.Prepare("insert into public.\"Computations\"(Name, Algorithm, VertexCount, Density, Replicas, StartTime, Status) values($1, $2, $3, $4, $5, $6, $7)")
 	if err != nil {
 		return err
 	}
 	defer stmt.Close()
 
+	desc := computation.Description()
 	_, err = stmt.Exec(desc.Name, desc.Algorithm, desc.VertexCount, desc.Density, desc.Replicas, time.Now(), Starting)
 	if err != nil {
 		return err

@@ -20,14 +20,12 @@ const (
 )
 
 type ComputationService struct {
-	Logger          log.Logger
-	db              *ComputationServiceDbConnector
 	upcxxRunner     string
 	pgasGraphRunner string
 
-	description *ComputationDescription
-	cmd         *exec.Cmd
-	result      bytes.Buffer
+	Logger log.Logger
+	db     *ComputationServiceDbConnector
+	cache  *Computations
 }
 
 func NewComputationService(logger log.Logger) (*ComputationService, error) {
@@ -47,24 +45,23 @@ func NewComputationService(logger log.Logger) (*ComputationService, error) {
 		return nil, fmt.Errorf("Unable to start new UPCXX computation, error=%s", lookErr)
 	}
 
-	return &ComputationService{Logger: logger, db: db, upcxxRunner: upcxxRunnerBinary, pgasGraphRunner: pgasGraphRunnerBinary}, nil
+	return &ComputationService{
+		upcxxRunner:     upcxxRunnerBinary,
+		pgasGraphRunner: pgasGraphRunnerBinary,
+		Logger:          logger,
+		db:              db,
+		cache:           &Computations{}}, nil
 }
 
 func (cs *ComputationService) Start(ctx context.Context, desc *ComputationDescription) (*ComputationStatus, error) {
-	var err error
-
-	cs.description = desc
-	cs.cmd, err = cs.launchComputation(desc)
-	if err = cs.db.WriteNewComputationIntoDb(desc); err != nil {
+	computation, err := cs.launchComputation(desc)
+	if err != nil {
 		cs.Logger.Log("Start", "Failed", "Error", err)
-		if err := cs.cmd.Process.Kill(); err != nil {
-			cs.Logger.Log("ProcessKill", "Failed", "Error", err)
-			return nil, err
-		}
 		return nil, err
 	}
 
-	go cs.watchComputation()
+	// Store in cache
+	cs.cache.Append(computation)
 
 	return &ComputationStatus{Status: Starting}, nil
 }
@@ -86,31 +83,45 @@ func (*ComputationService) Stop(ctx context.Context, name string) (*ComputationS
 	return &ComputationStatus{Status: "Undefined"}, nil
 }
 
-// Launches computation using provided description and returns. Doesn't waits for it to finish.
-func (cs *ComputationService) launchComputation(desc *ComputationDescription) (*exec.Cmd, error) {
+// Asyncly launch computation.
+func (cs *ComputationService) launchComputation(desc *ComputationDescription) (*Computation, error) {
+	result := bytes.Buffer{}
 	upcxxCmd := exec.Command(cs.upcxxRunner, cs.constructLunchArguments(desc)...)
-	upcxxCmd.Stdout = &cs.result
-	execErr := upcxxCmd.Start()
-	if execErr != nil {
-		cs.Logger.Log("launchComputation", Failed, "Error", execErr)
-		return nil, fmt.Errorf("Unable to start new UPCXX computation, error=%s", execErr)
+	fmt.Println("args", cs.constructLunchArguments(desc))
+	upcxxCmd.Stdout = &result
+	err := upcxxCmd.Start()
+	if err != nil {
+		cs.Logger.Log("launchComputation", Failed, "Error", err)
+		return nil, fmt.Errorf("Unable to start new UPCXX computation, error=%s", err)
 	}
 
-	return upcxxCmd, nil
+	computation := NewComputation(desc, upcxxCmd, &result)
+	if err := cs.db.WriteNewComputationIntoDb(computation); err != nil {
+		cs.Logger.Log("WriteNewComputationIntoDb", "Failed", "Error", err)
+		if err := computation.Kill(); err != nil {
+			cs.Logger.Log("ProcessKill", "Failed", "Error", err)
+			return nil, err
+		}
+		return nil, err
+	}
+
+	go cs.watchComputation(computation)
+
+	return computation, nil
 }
 
 // Waits until computation is finished then updates its status in DB.
-func (cs *ComputationService) watchComputation() {
-	if err := cs.cmd.Wait(); err != nil {
-		cs.Logger.Log("watchComputation", Failed, "Name", cs.description.Name)
-		if err := cs.db.UpdateComputationStatusInDb(cs.description.Name, Failed, ""); err != nil {
+func (cs *ComputationService) watchComputation(computation *Computation) {
+	if err := computation.Wait(); err != nil {
+		cs.Logger.Log("watchComputation", Failed, "Name", computation.Description().Name)
+		if err := cs.db.UpdateComputationStatusInDb(computation.Description().Name, Failed, ""); err != nil {
 			cs.Logger.Log("UpdateComputationStatusInDb", Failed, "Error", err)
 		}
 		return
 	}
 
-	cs.Logger.Log("Computation", Finished, "Name", cs.description.Name, "Result", cs.result.String())
-	if err := cs.db.UpdateComputationStatusInDb(cs.description.Name, Finished, cs.result.String()); err != nil {
+	cs.Logger.Log("Computation", Finished, "Name", computation.Description().Name, "Result", computation.Result().String())
+	if err := cs.db.UpdateComputationStatusInDb(computation.Description().Name, Finished, computation.Result().String()); err != nil {
 		cs.Logger.Log("UpdateComputationStatusInDb", Failed, "Error", err)
 	}
 }
