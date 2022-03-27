@@ -43,6 +43,15 @@ spec:
       - name: glcs
         image: glcs:latest 
         imagePullPolicy: Never
+        env:
+          - name: DB_HOST
+            value: postgres
+          - name: DB_USER
+            value: postgres
+          - name: DB_PASSWORD
+            value: postgres
+          - name: DB_NAME
+            value: glcs
         volumeMounts:
           - name: shared-workspace
             mountPath: /shared-workspace

@@ -7,10 +7,6 @@ RUN go mod tidy
 RUN go build ./cmd/glcs
 
 
-ENV DB_HOST="10.104.195.155"
-ENV DB_NAME="glcs"
-ENV DB_USER="postgres"
-ENV DB_PASSWORD="postgres"
 ENV UPCXX_INSTALL="/shared-workspace/libs/upcxx"
 ENV PGASGRAPH_INSTALL="/shared-workspace/pgasgraph"
 ENV PATH="${UPCXX_INSTALL}/bin:${PGASGRAPH_INSTALL}/build/src/PGASGraphCLI:$PATH"
