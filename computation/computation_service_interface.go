@@ -39,6 +39,7 @@ type ComputationDescription struct {
 	VertexCount uint32    `json:"vertexCount"`
 	Density     uint32    `json:"density"`
 	Replicas    uint32    `json:"replicas"`
+	Duration    uint32    `json:"duration"`
 }
 
 type ComputationServiceInterface interface {

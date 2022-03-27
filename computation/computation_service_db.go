@@ -1,6 +1,7 @@
 package computation
 
 import (
+	"bytes"
 	"database/sql"
 	"fmt"
 	"os"
@@ -75,18 +76,22 @@ func (cc *ComputationServiceDbConnector) UpdateComputationStatusInDb(name string
 	return nil
 }
 
-func (cc *ComputationServiceDbConnector) ReadComputationFromDb(name string) (string, error) {
-	stmt, err := cc.db.Prepare("select result from public.\"Computations\" c where c.Name=$1")
+func (cc *ComputationServiceDbConnector) ReadComputationFromDb(name string) (*Computation, error) {
+	stmt, err := cc.db.Prepare("select Name, Algorithm, VertexCount, Replicas, Result from public.\"Computations\" c where c.Name=$1")
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	defer stmt.Close()
 
-	var result string
-	err = stmt.QueryRow(name).Scan(&result)
+	description := &ComputationDescription{}
+	computation := &Computation{description: description}
+	result := ""
+	err = stmt.QueryRow(name).Scan(&description.Name, &description.Algorithm, &description.VertexCount, &description.Replicas, &result)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return result, nil
+	computation.result = bytes.NewBufferString(result)
+
+	return computation, nil
 }

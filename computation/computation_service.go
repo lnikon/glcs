@@ -71,12 +71,12 @@ func (*ComputationService) Status(ctx context.Context, name string) (*Computatio
 }
 
 func (cs *ComputationService) Result(ctx context.Context, name string) (*ComputationResult, error) {
-	result, err := cs.db.ReadComputationFromDb(name)
+	computation, err := cs.db.ReadComputationFromDb(name)
 	if err != nil {
 		return nil, err
 	}
 
-	return &ComputationResult{Status: Finished, Result: result}, nil
+	return &ComputationResult{Status: Finished, Result: computation.result.String()}, nil
 }
 
 func (*ComputationService) Stop(ctx context.Context, name string) (*ComputationStatus, error) {
@@ -87,7 +87,6 @@ func (*ComputationService) Stop(ctx context.Context, name string) (*ComputationS
 func (cs *ComputationService) launchComputation(desc *ComputationDescription) (*Computation, error) {
 	result := bytes.Buffer{}
 	upcxxCmd := exec.Command(cs.upcxxRunner, cs.constructLunchArguments(desc)...)
-	fmt.Println("args", cs.constructLunchArguments(desc))
 	upcxxCmd.Stdout = &result
 	err := upcxxCmd.Start()
 	if err != nil {
@@ -120,8 +119,8 @@ func (cs *ComputationService) watchComputation(computation *Computation) {
 		return
 	}
 
-	cs.Logger.Log("Computation", Finished, "Name", computation.Description().Name, "Result", computation.Result().String())
-	if err := cs.db.UpdateComputationStatusInDb(computation.Description().Name, Finished, computation.Result().String()); err != nil {
+	cs.Logger.Log("Computation", Finished, "Name", computation.Description().Name, "Result", computation.Result())
+	if err := cs.db.UpdateComputationStatusInDb(computation.Description().Name, Finished, computation.Result()); err != nil {
 		cs.Logger.Log("UpdateComputationStatusInDb", Failed, "Error", err)
 	}
 }

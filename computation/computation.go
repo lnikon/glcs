@@ -49,11 +49,11 @@ func (c *Computation) Kill() error {
 }
 
 // Returns copy of computation result
-func (c *Computation) Result() *bytes.Buffer {
+func (c *Computation) Result() string {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
 
-	return &*c.result
+	return c.result.String()
 }
 
 // Returns copy of computation description
