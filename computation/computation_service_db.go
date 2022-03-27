@@ -20,7 +20,8 @@ func NewComputationServiceDbConnector() (*ComputationServiceDbConnector, error) 
 	dbUser := os.Getenv(string(common.DBUser))
 	dbPassword := os.Getenv(string(common.DBUser))
 	dbName := os.Getenv(string(common.DBName))
-	dbInfo := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable", dbUser, dbPassword, dbName)
+	dbHost := os.Getenv("10.104.195.155")
+	dbInfo := fmt.Sprintf("host=%s user=%s password=%s dbname=%s sslmode=disable", dbHost, dbUser, dbPassword, dbName)
 
 	db, err := sql.Open("postgres", dbInfo)
 	if err != nil {
