@@ -45,13 +45,15 @@ spec:
         imagePullPolicy: Never
         env:
           - name: DB_HOST
-            value: postgres
+            value: "postgres"
+          - name: DB_PORT
+            value: "5432"
           - name: DB_USER
-            value: postgres
+            value: "postgres"
           - name: DB_PASSWORD
-            value: postgres
+            value: "postgres"
           - name: DB_NAME
-            value: glcs
+            value: "glcs"
         volumeMounts:
           - name: shared-workspace
             mountPath: /shared-workspace

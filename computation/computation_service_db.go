@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/lnikon/glcs/common"
@@ -20,8 +21,12 @@ func NewComputationServiceDbConnector() (*ComputationServiceDbConnector, error) 
 	dbUser := os.Getenv(string(common.DBUser))
 	dbPassword := os.Getenv(string(common.DBUser))
 	dbName := os.Getenv(string(common.DBName))
-	dbHost := os.Getenv("10.104.195.155")
-	dbInfo := fmt.Sprintf("host=%s user=%s password=%s dbname=%s sslmode=disable", dbHost, dbUser, dbPassword, dbName)
+	dbHost := os.Getenv(string(common.DBHost))
+	dbPort, err := strconv.Atoi(os.Getenv(string(common.DBPort)))
+	if err != nil {
+		return nil, err
+	}
+	dbInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", dbHost, dbPort, dbUser, dbPassword, dbName)
 
 	db, err := sql.Open("postgres", dbInfo)
 	if err != nil {

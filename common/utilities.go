@@ -29,6 +29,7 @@ type DBEnvVar string
 // Move into .env.
 const (
 	DBHost     DBEnvVar = "DB_HOST"
+	DBPort     DBEnvVar = "DB_PORT"
 	DBName     DBEnvVar = "DB_NAME"
 	DBUser     DBEnvVar = "DB_USER"
 	DBPassword DBEnvVar = "DB_PASSWORD"
