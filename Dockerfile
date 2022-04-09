@@ -6,7 +6,6 @@ RUN git clone https://github.com/lnikon/glcs .
 RUN go mod tidy
 RUN go build ./cmd/glcs
 
-
 ENV UPCXX_INSTALL="/shared-workspace/libs/upcxx"
 ENV PGASGRAPH_INSTALL="/shared-workspace/pgasgraph"
 ENV PATH="${UPCXX_INSTALL}/bin:${PGASGRAPH_INSTALL}/build/src/PGASGraphCLI:$PATH"
@@ -19,4 +18,4 @@ ENV PORT $PORT
 
 EXPOSE $PORT
 
-CMD cp -rf /workspace/* /shared-workspace/ && cd /shared-workspace/glcs && ./glcs --http=$HOST:$PORT
+CMD ./glcs --http=$HOST:$PORT
